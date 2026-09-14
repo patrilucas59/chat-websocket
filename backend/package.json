@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A backend for a chat application using WebSockets.",
   "type": "module",
-  "main": "src/server,js",
+  "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js"
