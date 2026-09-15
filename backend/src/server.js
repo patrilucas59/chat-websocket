@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import http from 'node:http';
+import './db.js';
 
 import { WebSocketServer } from 'ws';
 
@@ -17,10 +18,10 @@ const server = http.createServer(app);
 
 const wss = new WebSocketServer({ server });
 
-wss.on('connection', (wss) => {
+wss.on('connection', (socket) => {
   console.log('Novo cliente conectado via WebSocket');
 
-  wss.on('close', () => {
+  socket.on('close', () => {
     console.log('Cliente desconectado');
   });
 });
