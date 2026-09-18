@@ -17,6 +17,7 @@
     "incompleta",
     "inserir",
     "inválida",
+    "lista",
     "Mensagem",
     "mensagens",
     "obrigatório",
@@ -26,6 +27,7 @@
     "salvar",
     "Servidor",
     "Usuário",
-    "usuarios"
+    "usuarios",
+    "usuários"
   ]
 }
