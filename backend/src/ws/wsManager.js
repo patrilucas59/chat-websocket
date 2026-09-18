@@ -4,7 +4,7 @@ import db from '../db.js';
 
 const clientes = new Map();
 
-const inserirMessagem = db.prepare(`
+const inserirMensagem = db.prepare(`
   INSERT INTO mensagens (remetente_id, destinatario_id, conteudo)
   VALUES (?, ?, ?)
 `);
@@ -42,7 +42,7 @@ export function configurationWebSocket(server) {
       }
 
       try {
-        inserirMessagem.run(userId, destinatarioId, conteudo);
+        inserirMensagem.run(userId, destinatarioId, conteudo);
       } catch (err) {
         console.log(`Erro ao salvar mensagem de ${userId} para ${destinatarioId}:`, err.message);
         return;
