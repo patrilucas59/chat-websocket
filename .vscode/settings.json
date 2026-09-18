@@ -1,14 +1,19 @@
 {
   "cSpell.words": [
     "AUTOINCREMENT",
+    "buscar",
+    "buscarHistorico",
     "clientes",
     "conectado",
+    "contato",
     "conteudo",
     "conversa",
     "desconectado",
     "destinatario",
     "Erro",
     "está",
+    "historico",
+    "histórico",
     "incompleta",
     "inserir",
     "inválida",
@@ -17,7 +22,9 @@
     "obrigatório",
     "recebida",
     "remetente",
+    "rodando",
     "salvar",
+    "Servidor",
     "Usuário",
     "usuarios"
   ]
