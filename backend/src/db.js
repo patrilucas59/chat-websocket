@@ -3,9 +3,9 @@ import Database from 'better-sqlite3';
 const db = new Database('database.db');
 db.pragma('foreign_keys = ON');
 
-db.exec(`CREATE TABLE IF NOT EXISTS usuarios (
+db.exec(`CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  nome TEXT UNIQUE NOT NULL
+  name TEXT UNIQUE NOT NULL
 )`);
 
 db.exec(`CREATE TABLE IF NOT EXISTS mensagens (
