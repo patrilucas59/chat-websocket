@@ -2,8 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import http from 'node:http';
 import './db.js';
-
-import { WebSocketServer } from 'ws';
+import { configurationWebSocket } from './ws/wsManager.js';
 
 const app = express();
 app.use(cors());
@@ -16,15 +15,7 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 3333;
 const server = http.createServer(app);
 
-const wss = new WebSocketServer({ server });
-
-wss.on('connection', (socket) => {
-  console.log('Novo cliente conectado via WebSocket');
-
-  socket.on('close', () => {
-    console.log('Cliente desconectado');
-  });
-});
+configurationWebSocket(server);
 
 server.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
