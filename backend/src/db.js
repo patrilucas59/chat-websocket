@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 
 const db = new Database('database.db');
+db.pragma('foreign_keys = ON');
 
 db.exec(`CREATE TABLE IF NOT EXISTS usuarios (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,5 +17,8 @@ db.exec(`CREATE TABLE IF NOT EXISTS mensagens (
   FOREIGN KEY (remetente_id) REFERENCES usuarios(id),
   FOREIGN KEY (destinatario_id) REFERENCES usuarios(id)
 )`);
+
+db.exec(`CREATE INDEX IF NOT EXISTS idx_mensagens_conversa
+  ON mensagens (remetente_id, destinatario_id);`);
 
 export default db;
