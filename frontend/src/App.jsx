@@ -6,6 +6,11 @@ function App() {
   const [usuarioAtual, setUsuarioAtual] = useState(null);
   const [contatoSelecionado, setContatoSelecionado] = useState(null);
 
+  const voltarParaSelecao = () => {
+    setUsuarioAtual(null);
+    setContatoSelecionado(null);
+  }
+
   if (!usuarioAtual) {
     return <UserSelect onSelecionar={setUsuarioAtual} />;
   }
@@ -16,6 +21,7 @@ function App() {
         usuarioAtual={usuarioAtual}
         contatoSelecionado={contatoSelecionado}
         onSelecionarContato={setContatoSelecionado}
+        onVoltar={voltarParaSelecao}
       />
       <div className='flex-1 text-white p-4'>
         {contatoSelecionado ? (
