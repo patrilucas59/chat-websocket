@@ -47,8 +47,8 @@ export function configurationWebSocket(server) {
         console.log(`Erro ao salvar mensagem de ${userId} para ${destinatarioId}:`, err.message);
         return;
       }
-
-      const socketDestinatario = clientes.get(destinatarioId);
+      // Força string na busca, já que a chave no Map é sempre string (vem da query da URl)
+      const socketDestinatario = clientes.get(String(destinatarioId));
 
       if (socketDestinatario && socketDestinatario.readyState === socketDestinatario.OPEN) {
         socketDestinatario.send(JSON.stringify({

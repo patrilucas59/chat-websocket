@@ -1,14 +1,81 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import UserSelect from "./components/UserSelect";
 import ContactList from "./components/ContactList";
+import http from "./api/http";
+import ChatArea from "./components/ChatArea";
 
 function App() {
   const [usuarioAtual, setUsuarioAtual] = useState(null);
   const [contatoSelecionado, setContatoSelecionado] = useState(null);
+  const [mensagens, setMensagens] = useState([]);
+
+  const socketRef = useRef();
+  const contatoSelecionadoRef = useRef(null);
+
+  useEffect(() => {
+    contatoSelecionadoRef.current = contatoSelecionado;
+  }, [contatoSelecionado]);
+
+  useEffect(() => {
+    if (!usuarioAtual) return;
+
+    const socket = new WebSocket(`ws://localhost:3333?userId=${usuarioAtual.id}`);
+    socketRef.current = socket;
+
+    socket.onmessage = (event) => {
+      const payload = JSON.parse(event.data);
+      const contatoAtivo = contatoSelecionadoRef.current;
+
+      if (contatoAtivo && Number(payload.remetenteId) === contatoAtivo.id) {
+        setMensagens((atual) => [
+          ...atual,
+          {
+            remetente_id: payload.remetenteId,
+            destinatario_id: usuarioAtual.id,
+            conteudo: payload.conteudo,
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+      }
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, [usuarioAtual]);
+
+  useEffect(() => {
+    if (!usuarioAtual || !contatoSelecionado) return;
+    
+  http.get(`/mensagens/${usuarioAtual.id}/${contatoSelecionado.id}`)
+    .then((res) => setMensagens(res.data))
+    .catch((err) => console.log('Erro ao buscar histórico:', err.message))
+  }, [usuarioAtual, contatoSelecionado]);
 
   const voltarParaSelecao = () => {
+    socketRef.current?.close();
     setUsuarioAtual(null);
     setContatoSelecionado(null);
+    setMensagens([]);
+  }
+
+  const enviarMensagem = (conteudo) => {
+    if (!contatoSelecionado || !socketRef.current) return;
+
+    socketRef.current.send(JSON.stringify({
+      destinatarioId: contatoSelecionado.id,
+      conteudo,
+    }));
+
+    setMensagens((atual) => [
+      ...atual,
+      {
+        remetente_id: usuarioAtual.id,
+        destinatario_id: contatoSelecionado.id,
+        conteudo,
+        timestamp: new Date().toISOString(),
+      },
+    ])
   }
 
   if (!usuarioAtual) {
@@ -23,13 +90,12 @@ function App() {
         onSelecionarContato={setContatoSelecionado}
         onVoltar={voltarParaSelecao}
       />
-      <div className='flex-1 text-white p-4'>
-        {contatoSelecionado ? (
-          <p>Conversando com: {contatoSelecionado.nome}</p>
-        ) : (
-          <p>Selecione um contato para começar a conversar</p>
-        )}
-      </div>
+      <ChatArea
+        usuarioAtual={usuarioAtual}
+        contatoSelecionado={contatoSelecionado}
+        mensagens={contatoSelecionado ? mensagens : []}
+        onEnviar={enviarMensagem}
+      />
     </div>
   );
 }
