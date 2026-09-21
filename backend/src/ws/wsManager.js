@@ -9,6 +9,14 @@ const inserirMensagem = db.prepare(`
   VALUES (?, ?, ?)
 `);
 
+function transmitirParaTodos(mensagem, remetenteId) {
+  for (const [id, socket] of clientes) {
+    if (id !== remetenteId && socket.readyState === socket.OPEN) {
+      socket.send(JSON.stringify(mensagem));
+    }
+  }
+}
+
 export function configurationWebSocket(server) {
   const wss = new WebSocketServer({ server });
 
@@ -23,6 +31,13 @@ export function configurationWebSocket(server) {
 
     clientes.set(userId, socket);
     console.log(`Usuário ${userId} está conectado`);
+
+    socket.send(JSON.stringify({
+      type: 'online-list',
+      ids: [...clientes.keys()],
+    }));
+
+    transmitirParaTodos({ type: 'presence', userId, status: 'online' }, userId);
 
     socket.on('message', (data) => {
       let payload;
@@ -52,6 +67,7 @@ export function configurationWebSocket(server) {
 
       if (socketDestinatario && socketDestinatario.readyState === socketDestinatario.OPEN) {
         socketDestinatario.send(JSON.stringify({
+          type: 'message',
           remetenteId: userId,
           conteudo,
         }));
@@ -61,6 +77,8 @@ export function configurationWebSocket(server) {
     socket.on('close', () => {
       clientes.delete(userId);
       console.log(`Usuário ${userId} está desconectado`);
+
+      transmitirParaTodos({ type: 'presence', userId, status: 'online' }, userId);
     });
   });
 

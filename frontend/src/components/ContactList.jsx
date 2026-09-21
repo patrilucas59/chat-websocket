@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import http from "../api/http";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-function ContactList({ usuarioAtual, onSelecionarContato, contatoSelecionado, onVoltar }) {
+function ContactList({ usuarioAtual, onSelecionarContato, contatoSelecionado, onVoltar, onlineIds }) {
   const [contatos, setContatos] = useState([]);
 
   useEffect(() => {
@@ -27,20 +27,27 @@ function ContactList({ usuarioAtual, onSelecionarContato, contatoSelecionado, on
         <h2 className='text-white font-bold'>Contatos</h2>
       </div>
       <ul className='flex flex-col gap-2'>
-        {contatos.map((contato) => (
-          <li key={contato.id}>
-            <button
-              onClick={() => onSelecionarContato(contato)}
-              className={`w-full text-left px-3 py-2 rounded-lg transition cursor-pointer ${
-               contatoSelecionado?.id === contato.id
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-gray-200 hover:bg-gray-600'                 
-              }`}
-            >
-              {contato.nome}
-            </button>
-          </li>
-        ))}
+        {contatos.map((contato) => {
+          const online = onlineIds.has(contato.id);
+          return (
+            <li key={contato.id}>
+              <button
+                onClick={() => onSelecionarContato(contato)}
+                className={`w-full flex items-center gap-2 text-left px-3 py-2 rounded-lg transition cursor-pointer ${
+                 contatoSelecionado?.id === contato.id
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 text-gray-200 hover:bg-gray-600'                 
+                }`}
+              >
+                <span 
+                  className={`w-2.5 h-2.5 rounded-full ${online ? 'bg-green-400' : 'bg-gray-500'}`}
+                  title={online ? 'Online' : 'Offline'}
+                />
+                {contato.nome}
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </div>
   )

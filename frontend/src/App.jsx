@@ -8,6 +8,7 @@ function App() {
   const [usuarioAtual, setUsuarioAtual] = useState(null);
   const [contatoSelecionado, setContatoSelecionado] = useState(null);
   const [mensagens, setMensagens] = useState([]);
+  const [onlineIds, setOnlineIds] = useState(new Set());
 
   const socketRef = useRef();
   const contatoSelecionadoRef = useRef(null);
@@ -24,7 +25,26 @@ function App() {
 
     socket.onmessage = (event) => {
       const payload = JSON.parse(event.data);
-      const contatoAtivo = contatoSelecionadoRef.current;
+
+      if (payload.type === 'online-list') {
+        setOnlineIds(new Set(payload.ids.map(Number)));
+      }
+
+      if (payload.type === 'presence') {
+        setOnlineIds((atual) => {
+          const novo = new Set(atual);
+          if (payload.status === 'online') {
+            novo.add(Number(payload.userId));
+          } else {
+            novo.delete(Number(payload.userId));
+          }
+          return novo;
+        });
+        return;
+      }
+
+      if (payload.type === 'message') {
+        const contatoAtivo = contatoSelecionadoRef.current;
 
       if (contatoAtivo && Number(payload.remetenteId) === contatoAtivo.id) {
         setMensagens((atual) => [
@@ -38,6 +58,7 @@ function App() {
         ]);
       }
     };
+  }    
 
     return () => {
       socket.close();
@@ -89,6 +110,7 @@ function App() {
         contatoSelecionado={contatoSelecionado}
         onSelecionarContato={setContatoSelecionado}
         onVoltar={voltarParaSelecao}
+        onlineIds={onlineIds}
       />
       <ChatArea
         usuarioAtual={usuarioAtual}
