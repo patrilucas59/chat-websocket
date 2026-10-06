@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import http from "../api/http";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ConnectionStatus from './ConnectionStatus';
 
-function ContactList({ usuarioAtual, onSelecionarContato, contatoSelecionado, onVoltar, onlineIds }) {
+function ContactList({ usuarioAtual, onSelecionarContato, contatoSelecionado, onVoltar, onlineIds, statusConexao }) {
   const [contatos, setContatos] = useState([]);
 
   useEffect(() => {
@@ -15,7 +16,7 @@ function ContactList({ usuarioAtual, onSelecionarContato, contatoSelecionado, on
   }, [usuarioAtual]);
 
   return (
-    <div className='w-64 bg-gray-800 h-screen p-4'>
+    <div className='w-64 bg-gray-800 h-screen p-4 flex flex-col'>
       <div className="flex flex-row items-center gap-2 mb-4">
         <button
           onClick={onVoltar}
@@ -49,6 +50,9 @@ function ContactList({ usuarioAtual, onSelecionarContato, contatoSelecionado, on
           );
         })}
       </ul>
+      <div className='mt-auto pt-4 border-t border-gray-700'>
+        <ConnectionStatus status={statusConexao} />
+      </div>
     </div>
   )
 }

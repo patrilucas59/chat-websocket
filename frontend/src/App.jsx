@@ -9,6 +9,8 @@ function App() {
   const [contatoSelecionado, setContatoSelecionado] = useState(null);
   const [mensagens, setMensagens] = useState([]);
   const [onlineIds, setOnlineIds] = useState(new Set());
+  
+  const [statusConexao, setStatusConexao] = useState('conectando');
 
   const socketRef = useRef();
   const contatoSelecionadoRef = useRef(null);
@@ -23,11 +25,19 @@ function App() {
     const socket = new WebSocket(`ws://localhost:3333?userId=${usuarioAtual.id}`);
     socketRef.current = socket;
 
+    socket.onopen = () => setStatusConexao('conectado');
+    socket.onclose = () => {
+      setStatusConexao('desconectado');
+      setOnlineIds(new Set());
+    };
+    socket.onerror = () => setStatusConexao('desconectado');
+
     socket.onmessage = (event) => {
       const payload = JSON.parse(event.data);
 
       if (payload.type === 'online-list') {
         setOnlineIds(new Set(payload.ids.map(Number)));
+        return;
       }
 
       if (payload.type === 'presence') {
@@ -46,21 +56,24 @@ function App() {
       if (payload.type === 'message') {
         const contatoAtivo = contatoSelecionadoRef.current;
 
-      if (contatoAtivo && Number(payload.remetenteId) === contatoAtivo.id) {
-        setMensagens((atual) => [
-          ...atual,
-          {
-            remetente_id: payload.remetenteId,
-            destinatario_id: usuarioAtual.id,
-            conteudo: payload.conteudo,
-            timestamp: new Date().toISOString(),
-          },
-        ]);
-      }
-    };
-  }    
+        if (contatoAtivo && Number(payload.remetenteId) === contatoAtivo.id) {
+          setMensagens((atual) => [
+            ...atual,
+            {
+              remetente_id: payload.remetenteId,
+              destinatario_id: usuarioAtual.id,
+              conteudo: payload.conteudo,
+              timestamp: new Date().toISOString(),
+            },
+          ]);
+        }
+      };
+    }    
 
     return () => {
+      socket.onopen = null;
+      socket.onclose = null;
+      socket.onerror = null;
       socket.close();
     };
   }, [usuarioAtual]);
@@ -78,6 +91,7 @@ function App() {
     setUsuarioAtual(null);
     setContatoSelecionado(null);
     setMensagens([]);
+    setStatusConexao('conectando');
   }
 
   const enviarMensagem = (conteudo) => {
@@ -111,6 +125,7 @@ function App() {
         onSelecionarContato={setContatoSelecionado}
         onVoltar={voltarParaSelecao}
         onlineIds={onlineIds}
+        statusConexao={statusConexao}
       />
       <ChatArea
         usuarioAtual={usuarioAtual}
